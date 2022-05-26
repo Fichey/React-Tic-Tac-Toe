@@ -55,6 +55,10 @@ function Square(props) {
         }],
         stepNumber: 0,
         xIsNext: true,
+        moveList: [
+          [null,null,null]
+        ],
+        isReversed: false,
       };
     }
   
@@ -62,16 +66,21 @@ function Square(props) {
       const history = this.state.history.slice(0, this.state.stepNumber + 1);
       const current = history[history.length - 1];
       const squares = current.squares.slice();
+      const moveList = this.state.moveList.slice(0, this.state.stepNumber + 1);
       if (calculateWinner(squares) || squares[i]) {
         return;
       }
       squares[i] = this.state.xIsNext ? 'X' : 'O';
+      
       this.setState({
         history: history.concat([{
           squares: squares
         }]),
         stepNumber: history.length,
         xIsNext: !this.state.xIsNext,
+        moveList: moveList.concat([
+          [this.state.xIsNext ? 'X' : 'O', i % 3 +1, Math.floor(i / 3) +1]
+        ])
       });
     }
 
@@ -86,24 +95,28 @@ function Square(props) {
       const history = this.state.history;
       const current = history[this.state.stepNumber];
       const winner = calculateWinner(current.squares);
-
-      const moves = history.map((step, move) => {
+      const moveList = this.state.moveList;
+      const moves = []
+      history.map((step, move) => {
         const desc = move? 
-          'go to move #' + move :
+          move + ". move: " + moveList[move][0] + " to (" + moveList[move][1]+"," + moveList[move][2] + ")":
           'go to game start';
-        return (
+        moves.push(
           <li key={move}>
-            <button onClick={()=> this.jumpTo(move)}>{desc}</button>
+            <button onClick={()=> this.jumpTo(move)}>{(move === this.state.stepNumber ? <b>{desc}</b>: desc)}</button>
           </li>
         );
+        return true;
       });
   
       let status;
-      if (winner) {
+      if (winner) 
         status = 'Winner: ' + winner;
-      } else {
+      else if (this.state.stepNumber === 9)
+        status = 'Draw';
+      else 
         status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-      }
+      
   
       return (
         <div className="game">
@@ -114,8 +127,11 @@ function Square(props) {
             />
           </div>
           <div className="game-info">
+            <button onClick={() => this.setState({
+              isReversed: !this.state.isReversed,
+            })}>Reversed - {this.state.isReversed? "on" : "off"}</button>
             <div>{status}</div>
-            <ol>{moves}</ol>
+            <ul>{this.state.isReversed? moves.reverse(): moves}</ul>
           </div>
         </div>
       );

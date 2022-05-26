@@ -3,9 +3,6 @@ body {
     margin: 20px;
   }
   
-  ol, ul {
-    padding-left: 30px;
-  }
   
   .board-row:after {
     clear: both;
@@ -49,3 +46,7 @@ body {
     margin-left: 20px;
   }
   
+  ul{
+    list-style: none;
+    padding-left: 0;
+  }
